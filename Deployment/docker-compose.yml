@@ -1,0 +1,30 @@
+version: "3.6"
+services:
+    rabbitmq:
+        container_name: rabbitmq
+        ports:
+            - 5672:5672
+            - 15672:15672
+        environment:
+            - RABBITMQ_DEFAULT_USER=guest
+            - RABBITMQ_DEFAULT_PASS=guest
+        image: rabbitmq:3-management
+    api:
+        build:
+            context: .
+            dockerfile: ../API/Dockerfile
+        container_name: api
+        environment:
+            - ASPNETCORE_URLS=http://+:80
+        ports:
+            - 80:80
+        depends_on:
+            - rabbitmq
+    worker:
+        build:
+            context: .
+            dockerfile: ../Worker/Dockerfile
+        container_name: worker
+        image: chmielinski/ridelyworker
+        depends_on:
+            - rabbitmq
